@@ -4,44 +4,62 @@ using UnityEngine;
 
 public class EnemiControlador : MonoBehaviour
 {
-    public Transform player;
-    public float deteccionEnRadio = 5.0f;
-    public float velocidad = 2.0f;
+    [Header("ReferenciasE")]
 
     private Rigidbody2D rb;
-    private Vector2 movimientos;
+
+    [Header("MovimientoE")]
+
+    [SerializeField] private float velocidadMovimientoEBase;
+    [SerializeField] private float velocidadMovimientoEActual;
+    [SerializeField] private Transform controladorFrente;
+    [SerializeField] private float distanciaRaycast;
+    [SerializeField] private LayerMask capaSuelo;
+    public bool tocandoSueloFrente;
+
+    bool derecha = false;
+
+    private void Update()
+    {
+        tocandoSueloFrente = Physics2D.Raycast(controladorFrente.position, transform.right * -1, distanciaRaycast, capaSuelo);
+    }
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
     }
-
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        float ditanciaDelJugador = Vector2.Distance(transform.position, player.position);
-        if (ditanciaDelJugador < deteccionEnRadio)
-        {
-            Vector2 direccion = (player.position - transform.position).normalized;
-            movimientos = new Vector2(direccion.x, 0);
-        }
-        else
-        {
-            movimientos = Vector2.zero;
-        }
-        rb.MovePosition(rb.position + movimientos * velocidad * Time.deltaTime);
-    }
-    //private void OnCollisionEnter2D(Collision2D collision)
-    //{
-    //    if (collision.gameObject.CompareTag("Player"))
-    //    {
-    //        Vector2 direccionDaño = new Vector2(transform.position.x, 0);
-    //        collision.gameObject.GetComponent<MovimientoPlayer>().ResibeDaño(direccionDaño, 1);
-    //    }
-    //}
+        rb.linearVelocity = new Vector2(velocidadMovimientoEActual, rb.linearVelocity.y);
 
-    private void OnDrawGizmosSelected()
+        if (tocandoSueloFrente)
+        {
+            velocidadMovimientoEActual *= -1;
+
+            GirarE();
+        }
+        MirarDireccionMovimiento();
+    }
+    private void MirarDireccionMovimiento()
+    {
+        if ((velocidadMovimientoEActual > 0 && !MirarDerecha()) || (velocidadMovimientoEActual < 0 && MirarDerecha()))
+        {
+            GirarE();
+        }
+    }
+    private void GirarE()
+    {
+        Vector3 rotacion = transform.eulerAngles;
+        rotacion.y = rotacion.y == 0 ? 180 : 0;
+        transform.eulerAngles = rotacion;
+    }
+    private bool MirarDerecha()
+    {
+        return transform.eulerAngles.y == 180;
+    }
+    private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, deteccionEnRadio);
+        Gizmos.DrawLine(controladorFrente.position, controladorFrente.position + distanciaRaycast * transform.right * -1);
+
     }
 }

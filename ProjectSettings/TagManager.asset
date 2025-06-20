@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
@@ -12,8 +12,8 @@ TagManager:
   - Water
   - UI
   - pared
-  - 
-  - 
+  - Player
+  - Enemie
   - 
   - 
   - 
@@ -41,3 +41,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: 'Enemigo '
+    uniqueID: 3683751997
+    locked: 0
+  - name: Player
+    uniqueID: 2094276825
+    locked: 0
+  m_RenderingLayers:
+  - Default
