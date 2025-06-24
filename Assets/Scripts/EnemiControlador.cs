@@ -17,8 +17,6 @@ public class EnemiControlador : MonoBehaviour
     [SerializeField] private LayerMask capaSuelo;
     public bool tocandoSueloFrente;
 
-    bool derecha = false;
-
     private void Update()
     {
         tocandoSueloFrente = Physics2D.Raycast(controladorFrente.position, transform.right * -1, distanciaRaycast, capaSuelo);

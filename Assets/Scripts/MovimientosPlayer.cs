@@ -7,31 +7,33 @@ using UnityEngine.UIElements;
 
 public class MovimientoPlayer : MonoBehaviour
 {
+    private const string STRING_VELOCIDAD_HORIZONTAL = "VelocidadHorizontal";
     [Header("Referencia")]
     public Rigidbody2D rb;
+    [SerializeField] private Animator animator;
+
 
     [Header("Movimiento")]
-    public float velocidadx = 0.5f;
-    float velocidadX;
+    public float velocidadCaminar ; 
+    public float velocidadCorrer ; 
+    private float velocidadActual;        
     private float movX;
+    private bool estaCorriendo = true;
 
     [Header("Salto")]
-    public float fuerzaSalto = 6f;
-    public float fuerzaHorSalto = 6f;
+    public float fuerzaSalto ;
     public LayerMask entorno;
     [SerializeField] private bool enSuelo;
-    private bool recibiendoDaño;
     [SerializeField] private Transform controladorSuelo;
     [SerializeField] private Vector2 dimensionesCaja;
-    private bool entradaSalto;
 
     [Header("Salto Pared")]
     public float fuerzaSaltoPared = 3f;
     public float longitudRaycast = 0.1f;
+    public float fuerzaHorSalto ;
 
     [Header("Dash")]
     public float DashCooldown;
-    public GameObject dashParticle;
     public float dashForce = 20;
     bool canDash, isDashing;
     float dashingTime = 0.2f;
@@ -47,47 +49,61 @@ public class MovimientoPlayer : MonoBehaviour
 
     void Update()
     {
+        //MovimientoHorizontal
+        
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            estaCorriendo = !estaCorriendo; 
+        }
+       
+        if (estaCorriendo)
+        {
+            velocidadActual = velocidadCorrer; 
+        }
+        else
+        {
+            velocidadActual = velocidadCaminar; 
+        }
 
         movX = Input.GetAxis("Horizontal");
-        velocidadX = movX * velocidadx;
+        velocidadActual = movX * velocidadActual;
 
+
+        //Salto 
         if (movX < 0 && EnParedL() || movX > 0 && EnParedR())
         {
-            velocidadX = 0;
+            velocidadActual = 0;
         }
 
-        if (Input.GetButtonDown("Jump"))
-        {
-            entradaSalto = true;
-        }
+              enSuelo = Physics2D.OverlapBox(controladorSuelo.position, dimensionesCaja, 0f, entorno);
 
-        enSuelo = Physics2D.OverlapBox(controladorSuelo.position, dimensionesCaja, 0f, entorno);
 
         rb.gravityScale = EnParedR() && rb.linearVelocityY < 0 || EnParedL() && rb.linearVelocityY < 0 ? 0.1f : 1;
 
 
-        if (enSuelo && Input.GetKeyDown(KeyCode.Space) && !recibiendoDaño)
+        if (enSuelo && Input.GetKeyDown(KeyCode.Space) )
         {
             rb.AddForce(new Vector2(0f, fuerzaSalto), ForceMode2D.Impulse);
 
         }
-        else if (EnParedR() && Input.GetKeyDown(KeyCode.Space) && !recibiendoDaño)
+        else if (EnParedR() && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(new Vector2(-fuerzaHorSalto, fuerzaSaltoPared), ForceMode2D.Impulse);
             StartCoroutine(XD());
         }
-        else if (EnParedL() && Input.GetKeyDown(KeyCode.Space) && !recibiendoDaño)
+        else if (EnParedL() && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(new Vector2(fuerzaHorSalto, fuerzaSaltoPared), ForceMode2D.Impulse);
             StartCoroutine(XD());
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash && !recibiendoDaño)
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash)
         {
             StartCoroutine(Dash());
         }
 
         MirarDireccionMovimiento();
+        ControladorAnimaciones();
     }
     private void FixedUpdate()
     {
@@ -98,7 +114,7 @@ public class MovimientoPlayer : MonoBehaviour
 
         if (movX != 0)
         {
-            rb.linearVelocity = new Vector2(xD ? rb.linearVelocityX : velocidadX, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(xD ? rb.linearVelocityX : velocidadActual, rb.linearVelocity.y);
         }
     }
     bool EnParedR()
@@ -143,6 +159,7 @@ public class MovimientoPlayer : MonoBehaviour
     {
         return transform.eulerAngles.y == 0;
     }
+   
     private void GirarE()
     {
         Vector3 rotacion = transform.eulerAngles;
@@ -159,6 +176,10 @@ public class MovimientoPlayer : MonoBehaviour
 
         Gizmos.color = Color.green;
         Gizmos.DrawLine(transform.position, new Vector3(transform.position.x - longitudRaycast, transform.position.y, transform.position.z));
+    }
+    private void ControladorAnimaciones()
+    {
+        animator.SetFloat(STRING_VELOCIDAD_HORIZONTAL, Mathf.Abs(rb.linearVelocity.x));
     }
 }
 

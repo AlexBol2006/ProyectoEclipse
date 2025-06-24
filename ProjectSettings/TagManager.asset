@@ -41,11 +41,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: 'Enemigo '
-    uniqueID: 3683751997
+  - name: Enemigos
+    uniqueID: 2565559983
     locked: 0
-  - name: Player
-    uniqueID: 2094276825
+  - name: Jugador
+    uniqueID: 4072327799
     locked: 0
   m_RenderingLayers:
   - Default
